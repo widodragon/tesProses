@@ -1,74 +1,47 @@
 const express = require('express');
 var router = express.Router();
 const mongoose = require('mongoose');
-const News = mongoose.model('New');
+const News = require('../models/New.js');
 
-router.get('/', (req, res) => {
+router.get('/', (req, res, next) => {
     News.find((err, docs) => {
         if (!err) {
             res.json(docs);
         }
         else {
-            console.log('Error in retrieving news list :' + err);
+            res.status(500).json("err");
         }
     });
 });
-
-router.get('/:id', (req, res) => {
-    Employee.findById(req.params.id, (err, doc) => {
+router.get('/:id', (req, res,next) => {
+    News.findById(req.params.id, (err, doc) => {
         if (!err) {
             res.json(doc);
+        }else{
+            res.status(500).json("err");
         }
     });
 });
-
-router.post('/', (req, res) => {
-    var news = new News();
-    news.title = req.body.title;
-    news.content = req.body.content;
-    News.save((err, doc) => {
-        if (!err) {
-            res.json(doc);
-        }
-        else {
-            console.log('Error during record insertion news :' + err);
-        }
+router.post('/', (req, res, next) => {
+    News.create(req.body, (err, post)=> {
+      if (err) res.status(500).json("err");
+      res.json(post);
     });
 });
-
-router.put('/:id', (req, res) => {
-   News.findOneAndUpdate({ _id: req.params.id }, req.body, { new: true }, (err, news) => {
+router.put('/:id', (req, res, next) => {
+   News.findOneAndUpdate( req.params.id, req.body, { new: true }, (err, news) => {
         if (!err) { res.json(news); }
         else {
-                console.log('Error during record update : ' + err);
+            res.status(500).json("err");
         }
     });
 });
-
-
-// function handleValidationError(err, body) {
-//     for (field in err.errors) {
-//         switch (err.errors[field].path) {
-//             case 'fullName':
-//                 body['fullNameError'] = err.errors[field].message;
-//                 break;
-//             case 'email':
-//                 body['emailError'] = err.errors[field].message;
-//                 break;
-//             default:
-//                 break;
-//         }
-//     }
-// }
-
-
-router.get('/delete/:id', (req, res) => {
+router.delete('/delete/:id', (req, res, next) => {
     News.findByIdAndRemove(req.params.id, (err, doc) => {
         if (!err) {
             res.json(doc);
         }
-        else { console.log('Error in employee delete :' + err); }
+        else { res.status(500).json("err"); }
     });
 });
-
 module.exports = router;
